@@ -32,7 +32,7 @@ export function createGitHostedTarballFetcher (fetchRemoteTarball: FetchFunction
       filesIndexFile: tempIndexFile,
     })
     try {
-      const prepareResult = await prepareGitHostedPkg(filesIndex as Record<string, string>, cafs, tempIndexFile, opts.filesIndexFile, fetcherOpts, opts, resolution)
+      const prepareResult = await prepareGitHostedPkg(filesIndex, cafs, tempIndexFile, opts.filesIndexFile, fetcherOpts, opts, resolution)
       if (prepareResult.ignoredBuild) {
         globalWarn(`The git-hosted package fetched from "${resolution.tarball}" has to be built but the build scripts were ignored.`)
       }

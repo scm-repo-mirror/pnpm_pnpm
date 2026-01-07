@@ -1303,6 +1303,9 @@ importers:
       encode-registry:
         specifier: 'catalog:'
         version: 3.0.1
+      load-json-file:
+        specifier: 'catalog:'
+        version: 7.0.1
       tinyglobby:
         specifier: 'catalog:'
         version: 0.2.15

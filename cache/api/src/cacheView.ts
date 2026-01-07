@@ -3,6 +3,7 @@ import path from 'path'
 import { glob } from 'tinyglobby'
 import { getIndexFilePathInCafs } from '@pnpm/store.cafs'
 import { type PackageMeta } from '@pnpm/npm-resolver'
+import { loadJsonFileSync } from 'load-json-file'
 import getRegistryName from 'encode-registry'
 
 interface CachedVersions {
@@ -20,7 +21,7 @@ export async function cacheView (opts: { cacheDir: string, storeDir: string, reg
   })).sort()
   const metaFilesByPath: Record<string, CachedVersions> = {}
   for (const filePath of metaFilePaths) {
-    const metaObject = JSON.parse(fs.readFileSync(path.join(opts.cacheDir, filePath), 'utf8')) as PackageMeta
+    const metaObject = loadJsonFileSync(path.join(opts.cacheDir, filePath)) as PackageMeta
     const cachedVersions: string[] = []
     const nonCachedVersions: string[] = []
     for (const [version, manifest] of Object.entries(metaObject.versions)) {

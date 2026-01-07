@@ -36,6 +36,7 @@
     "@pnpm/npm-resolver": "workspace:*",
     "@pnpm/store.cafs": "workspace:*",
     "encode-registry": "catalog:",
+    "load-json-file": "catalog:",
     "tinyglobby": "catalog:"
   },
   "peerDependencies": {

@@ -36,7 +36,7 @@ export function importIndexedDir (
     } catch {} // eslint-disable-line:no-empty
     if (util.types.isNativeError(err) && 'code' in err && err.code === 'EEXIST') {
       const { uniqueFileMap, conflictingFileNames } = getUniqueFileMap(filenames)
-      if (Object.keys(conflictingFileNames).length === 0) throw err
+      if (conflictingFileNames.size === 0) throw err
       filenameConflictsLogger.debug({
         conflicts: conflictingFileNames,
         writingTo: newDir,
@@ -45,7 +45,7 @@ export function importIndexedDir (
         `Not all files were linked to "${path.relative(process.cwd(), newDir)}". ` +
         'Some of the files have equal names in different case, ' +
         'which is an issue on case-insensitive filesystems. ' +
-        `The conflicting file names are: ${JSON.stringify(conflictingFileNames)}`
+        `The conflicting file names are: ${JSON.stringify(Object.fromEntries(Array.from(conflictingFileNames.entries())))}`
       )
       importIndexedDir(importFile, newDir, uniqueFileMap, opts)
       return
@@ -100,18 +100,18 @@ function tryImportIndexedDir (importFile: ImportFile, newDir: string, filenames:
 }
 
 interface GetUniqueFileMapResult {
-  conflictingFileNames: Record<string, string>
+  conflictingFileNames: Map<string, string>
   uniqueFileMap: Record<string, string>
 }
 
 function getUniqueFileMap (fileMap: Record<string, string>): GetUniqueFileMapResult {
   const lowercaseFiles = new Map<string, string>()
-  const conflictingFileNames: Record<string, string> = {}
+  const conflictingFileNames = new Map<string, string>()
   const uniqueFileMap: Record<string, string> = {}
   for (const filename of Object.keys(fileMap).sort()) {
     const lowercaseFilename = filename.toLowerCase()
     if (lowercaseFiles.has(lowercaseFilename)) {
-      conflictingFileNames[filename] = lowercaseFiles.get(lowercaseFilename)!
+      conflictingFileNames.set(filename, lowercaseFiles.get(lowercaseFilename)!)
       continue
     }
     lowercaseFiles.set(lowercaseFilename, filename)
