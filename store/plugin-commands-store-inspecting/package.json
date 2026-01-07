@@ -42,7 +42,6 @@
     "@pnpm/store-path": "workspace:*",
     "@pnpm/store.cafs": "workspace:*",
     "@pnpm/types": "workspace:*",
-    "@pnpm/util.lex-comparator": "catalog:",
     "chalk": "catalog:",
     "render-help": "catalog:"
   },

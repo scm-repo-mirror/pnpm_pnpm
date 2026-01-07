@@ -58,13 +58,10 @@ test('patch package with exact version', async () => {
 
   const filesIndexFile = path.join(opts.storeDir, 'index/c7/1ccf199e0fdae37aad13946b937d67bcd35fa111b84d21b3a19439cfdc2812-is-positive@1.0.0.v8')
   const filesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
-  expect(filesIndex.sideEffects).toBeTruthy()
   const sideEffectsKey = `${ENGINE_NAME};patch=${patchFileHash}`
-  expect(filesIndex.sideEffects!.has(sideEffectsKey)).toBeTruthy()
-  expect(filesIndex.sideEffects!.get(sideEffectsKey)!.added).toBeTruthy()
-  const patchedFileIntegrity = filesIndex.sideEffects!.get(sideEffectsKey)!.added!.get('index.js')?.integrity
+  const patchedFileIntegrity = filesIndex.sideEffects?.[sideEffectsKey].added?.['index.js']?.integrity
   expect(patchedFileIntegrity).toBeTruthy()
-  const originalFileIntegrity = filesIndex.files.get('index.js')!.integrity
+  const originalFileIntegrity = filesIndex.files['index.js'].integrity
   expect(originalFileIntegrity).toBeTruthy()
   // The integrity of the original file differs from the integrity of the patched file
   expect(originalFileIntegrity).not.toEqual(patchedFileIntegrity)
@@ -156,13 +153,10 @@ test('patch package with version range', async () => {
 
   const filesIndexFile = path.join(opts.storeDir, 'index/c7/1ccf199e0fdae37aad13946b937d67bcd35fa111b84d21b3a19439cfdc2812-is-positive@1.0.0.v8')
   const filesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
-  expect(filesIndex.sideEffects).toBeTruthy()
   const sideEffectsKey = `${ENGINE_NAME};patch=${patchFileHash}`
-  expect(filesIndex.sideEffects!.has(sideEffectsKey)).toBeTruthy()
-  expect(filesIndex.sideEffects!.get(sideEffectsKey)!.added).toBeTruthy()
-  const patchedFileIntegrity = filesIndex.sideEffects!.get(sideEffectsKey)!.added!.get('index.js')?.integrity
+  const patchedFileIntegrity = filesIndex.sideEffects?.[sideEffectsKey].added?.['index.js']?.integrity
   expect(patchedFileIntegrity).toBeTruthy()
-  const originalFileIntegrity = filesIndex.files.get('index.js')!.integrity
+  const originalFileIntegrity = filesIndex.files['index.js'].integrity
   expect(originalFileIntegrity).toBeTruthy()
   // The integrity of the original file differs from the integrity of the patched file
   expect(originalFileIntegrity).not.toEqual(patchedFileIntegrity)
@@ -326,13 +320,10 @@ test('patch package when scripts are ignored', async () => {
 
   const filesIndexFile = path.join(opts.storeDir, 'index/c7/1ccf199e0fdae37aad13946b937d67bcd35fa111b84d21b3a19439cfdc2812-is-positive@1.0.0.v8')
   const filesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
-  expect(filesIndex.sideEffects).toBeTruthy()
   const sideEffectsKey = `${ENGINE_NAME};patch=${patchFileHash}`
-  expect(filesIndex.sideEffects!.has(sideEffectsKey)).toBeTruthy()
-  expect(filesIndex.sideEffects!.get(sideEffectsKey)!.added).toBeTruthy()
-  const patchedFileIntegrity = filesIndex.sideEffects!.get(sideEffectsKey)!.added!.get('index.js')?.integrity
+  const patchedFileIntegrity = filesIndex.sideEffects?.[sideEffectsKey].added?.['index.js']?.integrity
   expect(patchedFileIntegrity).toBeTruthy()
-  const originalFileIntegrity = filesIndex.files.get('index.js')!.integrity
+  const originalFileIntegrity = filesIndex.files['index.js'].integrity
   expect(originalFileIntegrity).toBeTruthy()
   // The integrity of the original file differs from the integrity of the patched file
   expect(originalFileIntegrity).not.toEqual(patchedFileIntegrity)
@@ -417,13 +408,10 @@ test('patch package when the package is not in allowBuilds list', async () => {
 
   const filesIndexFile = path.join(opts.storeDir, 'index/c7/1ccf199e0fdae37aad13946b937d67bcd35fa111b84d21b3a19439cfdc2812-is-positive@1.0.0.v8')
   const filesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
-  expect(filesIndex.sideEffects).toBeTruthy()
   const sideEffectsKey = `${ENGINE_NAME};patch=${patchFileHash}`
-  expect(filesIndex.sideEffects!.has(sideEffectsKey)).toBeTruthy()
-  expect(filesIndex.sideEffects!.get(sideEffectsKey)!.added).toBeTruthy()
-  const patchedFileIntegrity = filesIndex.sideEffects!.get(sideEffectsKey)!.added!.get('index.js')?.integrity
+  const patchedFileIntegrity = filesIndex.sideEffects?.[sideEffectsKey].added?.['index.js']?.integrity
   expect(patchedFileIntegrity).toBeTruthy()
-  const originalFileIntegrity = filesIndex.files.get('index.js')!.integrity
+  const originalFileIntegrity = filesIndex.files['index.js'].integrity
   expect(originalFileIntegrity).toBeTruthy()
   // The integrity of the original file differs from the integrity of the patched file
   expect(originalFileIntegrity).not.toEqual(patchedFileIntegrity)

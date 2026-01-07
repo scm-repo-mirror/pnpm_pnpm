@@ -178,7 +178,7 @@ async function downloadAndUnpackTarballToDir (
 
   cafs.importPackage(targetDir, {
     filesResponse: {
-      filesIndex,
+      filesIndex: filesIndex as Record<string, string>,
       resolvedFrom: 'remote',
       requiresBuild: false,
     },

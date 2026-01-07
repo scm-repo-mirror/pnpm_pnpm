@@ -81,10 +81,7 @@ async function handleMessage (
       let { storeDir, filesIndexFile, readManifest, verifyStoreIntegrity } = message
       let pkgFilesIndex: PackageFilesIndex | undefined
       try {
-        pkgFilesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
-        if (pkgFilesIndex?.files && !(pkgFilesIndex.files instanceof Map)) {
-          pkgFilesIndex = undefined
-        }
+        pkgFilesIndex = readV8FileStrictSync(filesIndexFile)
       } catch {
         // ignoring. It is fine if the integrity file is not present. Just refetch the package
       }
@@ -192,7 +189,7 @@ function calcIntegrity (buffer: Buffer): string {
 interface AddFilesFromDirResult {
   status: string
   value: {
-    filesIndex: Map<string, string>
+    filesIndex: Record<string, string>
     manifest?: DependencyManifest
     requiresBuild: boolean
   }
@@ -257,8 +254,8 @@ function addFilesFromDir (
         },
       }
     }
-    filesIndex.sideEffects ??= new Map()
-    filesIndex.sideEffects.set(sideEffectsCacheKey, calculateDiff(filesIndex.files, filesIntegrity))
+    filesIndex.sideEffects = filesIndex.sideEffects ?? {}
+    filesIndex.sideEffects[sideEffectsCacheKey] = calculateDiff(filesIndex.files, filesIntegrity)
     if (filesIndex.requiresBuild == null) {
       requiresBuild = pkgRequiresBuild(manifest, filesIntegrity)
     } else {
@@ -283,23 +280,23 @@ function addManifestToCafs (cafs: CafsFunctions, filesIndex: FilesIndex, manifes
 
 function calculateDiff (baseFiles: PackageFiles, sideEffectsFiles: PackageFiles): SideEffectsDiff {
   const deleted: string[] = []
-  const added: PackageFiles = new Map()
-  for (const file of new Set([...baseFiles.keys(), ...sideEffectsFiles.keys()])) {
-    if (!sideEffectsFiles.has(file)) {
+  const added: PackageFiles = {}
+  for (const file of new Set([...Object.keys(baseFiles), ...Object.keys(sideEffectsFiles)])) {
+    if (!sideEffectsFiles[file]) {
       deleted.push(file)
     } else if (
-      !baseFiles.has(file) ||
-      baseFiles.get(file)!.integrity !== sideEffectsFiles.get(file)!.integrity ||
-      baseFiles.get(file)!.mode !== sideEffectsFiles.get(file)!.mode
+      !baseFiles[file] ||
+      baseFiles[file].integrity !== sideEffectsFiles[file].integrity ||
+      baseFiles[file].mode !== sideEffectsFiles[file].mode
     ) {
-      added.set(file, sideEffectsFiles.get(file)!)
+      added[file] = sideEffectsFiles[file]
     }
   }
   const diff: SideEffectsDiff = {}
   if (deleted.length > 0) {
     diff.deleted = deleted
   }
-  if (added.size > 0) {
+  if (Object.keys(added).length > 0) {
     diff.added = added
   }
   return diff
@@ -307,20 +304,20 @@ function calculateDiff (baseFiles: PackageFiles, sideEffectsFiles: PackageFiles)
 
 interface ProcessFilesIndexResult {
   filesIntegrity: PackageFiles
-  filesMap: Map<string, string>
+  filesMap: Record<string, string>
 }
 
 function processFilesIndex (filesIndex: FilesIndex): ProcessFilesIndexResult {
-  const filesIntegrity: PackageFiles = new Map()
-  const filesMap = new Map<string, string>()
-  for (const [k, { checkedAt, filePath, integrity, mode, size }] of filesIndex) {
-    filesIntegrity.set(k, {
+  const filesIntegrity: PackageFiles = {}
+  const filesMap: Record<string, string> = {}
+  for (const [k, { checkedAt, filePath, integrity, mode, size }] of Object.entries(filesIndex)) {
+    filesIntegrity[k] = {
       checkedAt,
       integrity: integrity.toString(), // TODO: use the raw Integrity object
       mode,
       size,
-    })
-    filesMap.set(k, filePath)
+    }
+    filesMap[k] = filePath
   }
   return { filesIntegrity, filesMap }
 }
