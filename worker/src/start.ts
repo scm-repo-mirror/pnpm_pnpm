@@ -1,8 +1,6 @@
 import crypto from 'crypto'
-import v8 from 'v8'
 import path from 'path'
 import fs from 'fs'
-import { readV8FileStrictSync } from '@pnpm/fs.v8-file'
 import gfs from '@pnpm/graceful-fs'
 import { type Cafs, type PackageFiles, type SideEffects, type SideEffectsDiff } from '@pnpm/cafs-types'
 import { createCafsStore } from '@pnpm/create-cafs-store'
@@ -20,6 +18,7 @@ import {
 } from '@pnpm/store.cafs'
 import { symlinkDependencySync } from '@pnpm/symlink-dependency'
 import { type DependencyManifest } from '@pnpm/types'
+import { loadJsonFileSync } from 'load-json-file'
 import { parentPort } from 'worker_threads'
 import {
   type AddDirToStoreMessage,
@@ -81,7 +80,7 @@ async function handleMessage (
       let { storeDir, filesIndexFile, readManifest, verifyStoreIntegrity } = message
       let pkgFilesIndex: PackageFilesIndex | undefined
       try {
-        pkgFilesIndex = readV8FileStrictSync(filesIndexFile)
+        pkgFilesIndex = loadJsonFileSync<PackageFilesIndex>(filesIndexFile)
       } catch {
         // ignoring. It is fine if the integrity file is not present. Just refetch the package
       }
@@ -242,7 +241,7 @@ function addFilesFromDir (
   if (sideEffectsCacheKey) {
     let filesIndex!: PackageFilesIndex
     try {
-      filesIndex = readV8FileStrictSync<PackageFilesIndex>(filesIndexFile)
+      filesIndex = loadJsonFileSync<PackageFilesIndex>(filesIndexFile)
     } catch {
       // If there is no existing index file, then we cannot store the side effects.
       return {
@@ -261,7 +260,7 @@ function addFilesFromDir (
     } else {
       requiresBuild = filesIndex.requiresBuild
     }
-    writeV8File(filesIndexFile, filesIndex)
+    writeJsonFile(filesIndexFile, filesIndex)
   } else {
     requiresBuild = writeFilesIndexFile(filesIndexFile, { manifest: manifest ?? {}, files: filesIntegrity })
   }
@@ -271,11 +270,11 @@ function addFilesFromDir (
 function addManifestToCafs (cafs: CafsFunctions, filesIndex: FilesIndex, manifest: DependencyManifest): void {
   const fileBuffer = Buffer.from(JSON.stringify(manifest, null, 2), 'utf8')
   const mode = 0o644
-  filesIndex.set('package.json', {
+  filesIndex['package.json'] = {
     mode,
     size: fileBuffer.length,
     ...cafs.addFile(fileBuffer, mode),
-  })
+  }
 }
 
 function calculateDiff (baseFiles: PackageFiles, sideEffectsFiles: PackageFiles): SideEffectsDiff {
@@ -384,19 +383,19 @@ function writeFilesIndexFile (
     files,
     sideEffects,
   }
-  writeV8File(filesIndexFile, filesIndex)
+  writeJsonFile(filesIndexFile, filesIndex)
   return requiresBuild
 }
 
-function writeV8File (filePath: string, data: unknown): void {
+function writeJsonFile (filePath: string, data: unknown): void {
   const targetDir = path.dirname(filePath)
   // TODO: use the API of @pnpm/cafs to write this file
   // There is actually no need to create the directory in 99% of cases.
   // So by using cafs API, we'll improve performance.
   fs.mkdirSync(targetDir, { recursive: true })
-  // We remove the "-index.v8" from the end of the temp file name
+  // We remove the "-index.json" from the end of the temp file name
   // in order to avoid ENAMETOOLONG errors
-  const temp = `${filePath.slice(0, -9)}${process.pid}`
-  gfs.writeFileSync(temp, v8.serialize(data))
+  const temp = `${filePath.slice(0, -11)}${process.pid}`
+  gfs.writeFileSync(temp, JSON.stringify(data))
   optimisticRenameOverwrite(temp, filePath)
 }

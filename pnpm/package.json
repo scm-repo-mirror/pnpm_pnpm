@@ -97,7 +97,6 @@
     "@pnpm/exec.build-commands": "workspace:*",
     "@pnpm/filter-workspace-packages": "workspace:*",
     "@pnpm/find-workspace-dir": "workspace:*",
-    "@pnpm/fs.v8-file": "workspace:*",
     "@pnpm/lockfile.types": "workspace:*",
     "@pnpm/logger": "workspace:*",
     "@pnpm/modules-yaml": "workspace:*",
